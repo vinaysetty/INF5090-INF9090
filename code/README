@@ -1,0 +1,35 @@
+_____________________    _____      _____ __________
+\__    ___/\______   \  /  _  \    /     \\______   \
+  |    |    |       _/ /  /_\  \  /  \ /  \|     ___/
+  |    |    |    |   \/    |    \/    Y    \    |
+  |____|    |____|_  /\____|__  /\____|__  /____|
+                   \/         \/         \/
+
+TRAMP Real-time Application Mobility Platform
+http://tramp-project.org/
+
+=====INTRODUCTION===============================================================
+
+This package contains the files for the TRAMP Data Exchanger, including the
+TRAMP daemon, the shared library and sample application components. The
+framework allows distributed application components to share data efficiently.
+
+=====FILES======================================================================
+
+AUTHORS          - List of authors...
+README           - This file...
+Makefile         - Makefile for GNU make utility. Run "make help" for more info!
+shm_clear.sh     - Script for manipulating shared memory. Used for debugging.
+
+app_producer.c   - Part 1 of 2 of the sample application. Inputs data.
+app_consumer.c   - Part 2 of 2 of the sample application. Outputs data.
+
+libtramp.h       - Header file for the shared library used by the applications.
+libtramp.c       - Implementation of the shared library.
+
+trampd.h         - Header file for the TRAMP daemon responsible for sockets etc.
+trampd.c         - Implementation of the TRAMP daemon.
+
+my-devices.cache - List of devices the TRAMP daemon uses for bootstrapping.
+
+================================================================================
