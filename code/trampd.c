@@ -1,5 +1,9 @@
 #include "trampd.h"
-
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 static void daemonize(void) {
 	//TODO: FIXME: Remove this return in production
 	return;
@@ -80,6 +84,16 @@ int send_message(int socket, char *message) {
 	}
 
 	return counter;
+}
+
+int send_file(int socket, char* filename) {
+	FILE *fd;
+	struct stat s;
+	fd = open(filename, O_RDONLY);
+	fstat(fd, &s); // get the size
+	void* adr = mmap(NULL, s.st_size, PROT_READ, MAP_SHARED, fd, 0); // get the address
+	write(socket, adr, s.st_size); // send the file from this address directly
+	return -1;
 }
 
 void *server_listen() {

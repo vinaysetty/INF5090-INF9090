@@ -28,7 +28,7 @@ void *data(void *message);
 void bootstrap();
 void peer_connect(char *line);
 int send_message(int socket, char *message);
-
+int send_file(int socket, char* filename);
 pthread_t peer_threads[MAX_PEERS];
 pthread_t data_threads[MAX_LABELS];
 

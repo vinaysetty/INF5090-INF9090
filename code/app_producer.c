@@ -1,7 +1,20 @@
 #include <libtramp.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define EVER ;;
+
+char *trim(char *s) {
+    char *ptr;
+    if (!s)
+        return NULL;   // handle NULL string
+    if (!*s)
+        return s;      // handle empty string
+    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+    ptr[1] = '\0';
+    return s;
+}
 
 int main(int argc, char **argv) {
 	// Disable output buffering so log will appear
@@ -14,9 +27,10 @@ int main(int argc, char **argv) {
 
 	// Data segment sizes are bounded by the OS' shared memory
 	// $ cat /proc/sys/kernel/shmmax gives 32 MB on my machine
-	size_t size_msg = 80;
+	size_t size_msg = 81;
 	size_t size_usr = 20;
 
+	int count = 0;
 	// Sequence number for outgoing messages
 	unsigned char counter = 0;
 
@@ -30,8 +44,21 @@ int main(int argc, char **argv) {
 	//                                                            |N|I|C|K|...|
 	// I.e. all the bytes are chatachters of the nickname
 	char *chat_usr = (char *) tramp_initialize(label_usr, size_usr);
-
+        
+        //Before writing to shared memory get the chat message in this string
+        char *message = (char *) malloc(size_msg);
+        
+        char *buffer = (char *) malloc(16 * 1024 * 1024);
+        //File pointer to be read
+        FILE *fd;
+        //Structure to get file stats
+        struct stat s;
 	// Publish the labels to the community
+        
+        char *filename = (char *) malloc(size_msg);
+        int bytesread = 0;
+        //file size
+        int fileLen = 0;
 	tramp_publish(label_msg, size_msg);
 	tramp_publish(label_usr, size_usr);
 
@@ -47,17 +74,60 @@ int main(int argc, char **argv) {
 	if((unsigned char) *chat_msg > 0 && (unsigned char) *chat_msg <= 255) {
 		counter = (unsigned char) *chat_msg;
 	}
-
 	for(EVER) {
 		// Prompt user for input
 		printf("<%s> ", chat_usr);
-
+                
+//		strcpy(chat_msg+1,"vinay\n");
+//		size_msg = 8;
+//		++count;
 		// First byte is sequence number. Rest is chat.
-		fgets(chat_msg + 1, size_msg, stdin);
-
+		fgets(message, size_msg, stdin);
+                //If the chat message starts with send start sending the file
+                if(strncmp(message, "send", strlen("send")) == 0)
+                {
+                    printf("inside send\n");
+                    strcpy(filename, message+5);
+                    fd = fopen(trim(filename), "r");
+                    if (!fd)
+                     {
+                                fprintf(stderr, "can't open file %s", filename);
+                                continue;
+                       }
+                    	//Get file length
+                    fseek(fd, 0, SEEK_END);
+                    fileLen=ftell(fd);
+                    fseek(fd, 0, SEEK_SET);
+                    //First send the file size
+                    printf("file open complete\n");
+                    printf("file_size: %d file_name: %s\n", fileLen, filename);
+                    sprintf(chat_msg+1, "file_size: %d file_name: %s", fileLen, filename);
+                    *chat_msg = ++counter;
+                    while(1)
+                    {
+                        printf("size of chat_msg: %d\n", sizeof(chat_msg));
+                        int bytes_read = fread(buffer,1,size_msg*4096,fd);
+                        printf("finished reading file bytes read %d %d\n", bytes_read, strlen(buffer));
+                         if (bytes_read == 0) // We're done reading from the file
+                                break;
+                        if(bytes_read < 0)
+                        {
+                            printf("Error reading file %s, error code: %d \n", filename, bytes_read);
+                            break;
+                        }
+                        strncpy(chat_msg+1, buffer, bytes_read+1);
+                        *chat_msg = ++counter;
+                    }
+                }
+                else
+                {
+                    strcpy(chat_msg+1, message);
+                        *chat_msg = ++counter;
+                }
+		printf("%d size: ", size_msg);
 		// First byte is sequence number
-		*chat_msg = ++counter;
 	}
 
 	return EXIT_SUCCESS;
 }
+
