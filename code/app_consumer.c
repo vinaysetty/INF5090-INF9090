@@ -1,7 +1,26 @@
 #include <libtramp.h>
 #include <string.h>
-
+#include <fcntl.h>
 #define EVER ;;
+
+char *trim(char *s) {
+    char *ptr;
+    if (!s)
+        return NULL;   // handle NULL string
+    if (!*s)
+        return s;      // handle empty string
+    for (ptr = s + strlen(s) - 1; (ptr >= s) && isspace(*ptr); --ptr);
+    ptr[1] = '\0';
+    return s;
+}
+
+char* substring(int start, int stop, const char *text)
+{
+    char *substring = (char *)(malloc(stop - start+1));
+    printf("%d, %d, %s\n",start, stop, text);
+   sprintf(substring, "%.*s\n", stop - start, &text[start]);
+   return substring;
+}
 
 int main(int argc, char **argv) {
 	// Disable output buffering so log will appear
@@ -16,7 +35,13 @@ int main(int argc, char **argv) {
 	// $ cat /proc/sys/kernel/shmmax gives 33554432, i.e 32 MB on my machine
 	size_t size_msg = 80;
 	size_t size_usr = 20;
-
+        char *temp_str;
+        int file_size = -1;
+        char *file_name;
+        int bytes_rcvd = 0;
+        FILE* fd;
+        //Page Size
+        int pageSize = 4096;
 	// Sequence number for incoming messages
 	unsigned char counter = 0;
 
@@ -53,7 +78,38 @@ int main(int argc, char **argv) {
 			if(chat_msg[strlen(chat_msg) - 1] == '\n') {
 				chat_msg[strlen(chat_msg) - 1] = '\0';
 			}
-
+                        if(strncmp(chat_msg+1, "file:", strlen("file:")) == 0)
+                        {
+                            printf("got file header\n");
+                            char *substr = strstr(chat_msg+1, "|");
+                            printf("%s\n", substr);
+                            temp_str = substring(5, substr-chat_msg-1, chat_msg+1);
+                            printf("%s\n", temp_str);
+                            file_size = atoi(temp_str);
+                            free(temp_str);
+                            temp_str = NULL;
+                            file_name = substring(0, strlen(substr+1), substr+1);
+                            printf("%s,%d\n",trim(file_name), file_size);
+                            fd = fopen(strcat(file_name,"_rcvd"), "wb+");
+                            free(file_name);
+                            file_name = NULL;
+                            continue;
+                        }
+                        
+                        if(file_size >= 0)
+                        {
+                            bytes_rcvd += fwrite(chat_msg+1, 1, pageSize, fd);
+                            printf("received so far: %d bytes \n", bytes_rcvd);
+                            fflush(fd);
+                            if(bytes_rcvd == file_size)
+                            {
+                                file_size = -1;
+                                fclose(fd);
+                                bytes_rcvd = 0;
+                            }
+                            continue;
+                        }
+                        
 			// Print the message to screen witch fancy smancy colors
 			printf("%c[%d;%dm", 27, 1, 32);
 			printf("[%u] ", counter);

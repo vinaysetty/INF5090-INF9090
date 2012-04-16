@@ -27,13 +27,14 @@ int main(int argc, char **argv) {
 
 	// Data segment sizes are bounded by the OS' shared memory
 	// $ cat /proc/sys/kernel/shmmax gives 32 MB on my machine
-	size_t size_msg = 81;
+	size_t size_msg = 80;
 	size_t size_usr = 20;
 
-	int count = 0;
 	// Sequence number for outgoing messages
 	unsigned char counter = 0;
-
+        
+        //Page Size
+        int pageSize = 4096;
 	// We decide that our main data structure is |0|1|2|...|
 	//                                           |S|T|T|...|
 	// Where S = sequence number and T is Text.
@@ -45,18 +46,15 @@ int main(int argc, char **argv) {
 	// I.e. all the bytes are chatachters of the nickname
 	char *chat_usr = (char *) tramp_initialize(label_usr, size_usr);
         
+         printf("finished tramp init\n");
         //Before writing to shared memory get the chat message in this string
         char *message = (char *) malloc(size_msg);
         
-        char *buffer = (char *) malloc(16 * 1024 * 1024);
         //File pointer to be read
         FILE *fd;
-        //Structure to get file stats
-        struct stat s;
 	// Publish the labels to the community
         
         char *filename = (char *) malloc(size_msg);
-        int bytesread = 0;
         //file size
         int fileLen = 0;
 	tramp_publish(label_msg, size_msg);
@@ -77,7 +75,6 @@ int main(int argc, char **argv) {
 	for(EVER) {
 		// Prompt user for input
 		printf("<%s> ", chat_usr);
-                
 //		strcpy(chat_msg+1,"vinay\n");
 //		size_msg = 8;
 //		++count;
@@ -101,13 +98,15 @@ int main(int argc, char **argv) {
                     //First send the file size
                     printf("file open complete\n");
                     printf("file_size: %d file_name: %s\n", fileLen, filename);
-                    sprintf(chat_msg+1, "file_size: %d file_name: %s", fileLen, filename);
+                    sprintf(chat_msg+1, "file:%d|%s", fileLen, filename);
                     *chat_msg = ++counter;
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
-                        int bytes_read = fread(buffer,1,size_msg*4096,fd);
-                        printf("finished reading file bytes read %d %d\n", bytes_read, strlen(buffer));
+                        int bytes_read = fread(chat_msg+1,1,(pageSize),fd);
+                        *chat_msg = ++counter;
+                        sleep(2);
+
                          if (bytes_read == 0) // We're done reading from the file
                                 break;
                         if(bytes_read < 0)
@@ -115,8 +114,6 @@ int main(int argc, char **argv) {
                             printf("Error reading file %s, error code: %d \n", filename, bytes_read);
                             break;
                         }
-                        strncpy(chat_msg+1, buffer, bytes_read+1);
-                        *chat_msg = ++counter;
                     }
                 }
                 else

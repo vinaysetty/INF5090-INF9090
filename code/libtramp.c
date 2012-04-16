@@ -1,5 +1,4 @@
 #include "libtramp.h"
-#include <errno.h>
 
 void* tramp_initialize(char *label, size_t size) {
 	char *shm = NULL;
@@ -13,7 +12,9 @@ void* tramp_initialize(char *label, size_t size) {
 
 	// Locate the data segment if locally available or create it if it is not
 	shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | SHM_R | SHM_W);
+/*
         printf("shmid %s \n", strerror(errno));
+*/
 	if(shmid < 0) {
 		shmid = shmget(key, size, 0 | SHM_R);
 
