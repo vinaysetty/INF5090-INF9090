@@ -100,11 +100,18 @@ int main(int argc, char **argv) {
                     printf("file_size: %d file_name: %s\n", fileLen, filename);
                     sprintf(chat_msg+1, "file:%d|%s", fileLen, filename);
                     *chat_msg = ++counter;
+                    int bytes_sent = 0;
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
-                        int bytes_read = fread(chat_msg+1,1,(pageSize),fd);
+                        int bytes_read = fread(chat_msg+1,1,(2*pageSize),fd);
+                        chat_msg[1] = bytes_read;
+                        printf("Bytes read : %d\n", bytes_read);
+                        bytes_sent += bytes_read;
+                        chat_msg[pageSize-1]='\0';
                         *chat_msg = ++counter;
+                        if(bytes_sent >= fileLen)
+                            break;
                         sleep(2);
 
                          if (bytes_read == 0) // We're done reading from the file

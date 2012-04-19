@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 	//                                                            |N|I|C|K|...|
 	// I.e. all the bytes are chatachter of the nickname
 	char *chat_usr = (char *) tramp_initialize(label_usr, size_usr);
-
+    char *message = (char *) malloc(pageSize);
 	// Get the nickname once
 	tramp_get(label_usr, size_usr);
 
@@ -78,12 +78,13 @@ int main(int argc, char **argv) {
 			if(chat_msg[strlen(chat_msg) - 1] == '\n') {
 				chat_msg[strlen(chat_msg) - 1] = '\0';
 			}
-                        if(strncmp(chat_msg+1, "file:", strlen("file:")) == 0)
+            strcpy(message,chat_msg+1);
+                        if(strncmp(message, "file:", strlen("file:")) == 0)
                         {
                             printf("got file header\n");
-                            char *substr = strstr(chat_msg+1, "|");
+                            char *substr = strstr(message, "|");
                             printf("%s\n", substr);
-                            temp_str = substring(5, substr-chat_msg-1, chat_msg+1);
+                            temp_str = substring(5, substr-message, message);
                             printf("%s\n", temp_str);
                             file_size = atoi(temp_str);
                             free(temp_str);
@@ -98,7 +99,7 @@ int main(int argc, char **argv) {
                         
                         if(file_size >= 0)
                         {
-                            bytes_rcvd += fwrite(chat_msg+1, 1, pageSize, fd);
+                            bytes_rcvd += fwrite(message, 1, strlen(message), fd);
                             printf("received so far: %d bytes \n", bytes_rcvd);
                             fflush(fd);
                             if(bytes_rcvd == file_size)
@@ -107,6 +108,9 @@ int main(int argc, char **argv) {
                                 fclose(fd);
                                 bytes_rcvd = 0;
                             }
+                            
+                            free(message);
+                            message = (char *) malloc(pageSize);
                             continue;
                         }
                         
