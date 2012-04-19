@@ -1,3 +1,8 @@
 
 \section{The choice of streamer}
 \label{sec:streamer}
+
+FFMPEG is a complete cross-platform solution to record, convert and stream video and audio. It is a free software licensed under the LGPL or GPL (dependent on the configuration), and is the leading multimedia framework today.
+FFMPEG provides tools for converting, streaming, playing and analysing multimedia, as well as a full developers library with the possibility to create allmoast anything you want. Big projects such as QStream, VLC, GStreamer and Google Chrome has used the framework.
+
+In our assignment we decided that this would be best to implement for streaming over the TRAMP platform, but due to time constraints we chose we did not have enough time to implement this framework. We instead decided to implement a streamer that copied over one big file by chunking the big file into small bits, sending them and putting them back together on the other side. This will in our eyes show the capabilities of TRAMP just as well as a more sophisticated streamer like the FFMPEG solution we had planned.
