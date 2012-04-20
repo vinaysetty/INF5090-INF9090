@@ -1,4 +1,8 @@
 \section{Related work}
 \label{sec:relatedwork}
 
+As we've mentioned earlier in the report Skype is one of the applications the developers of the TRAMP framework reference to. Skype was the first peer-to-peer voice over IP (VoIP) network, and requires minimal infrastructure in order to function. Skype came on market in late 2003 developed by Niklas Zennström and Janus Friis, the two main developer behind the filesharing system Kazaa. this was bought by eBay in late 2005 and again by Microsoft in May 2011.
+
+The skype arcitecture is designed around three entities: Supernodes, regular nodes and the login server. Each regular node has a cache of the IP address and portnumber to all reachable Supernodes. The Supernodes are a subset of the regular nodes. If a node has high uptime, good bandwidth and is not restricted by firewalls or Network Address translation (NAT) it can be chosen as a Supernode. This will ofcourse put some extra stress on the nodes not behind NAT, but also make Skype possible to work for free due to the little infrastructure needed in order to make the network work.
+
 %talk about a streaming application (pref p2p udp and tcp and what is trades / tradeoffs when using the different
