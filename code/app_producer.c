@@ -4,6 +4,22 @@
 #include <fcntl.h>
 
 #define EVER ;;
+typedef unsigned char byte;
+typedef unsigned int uint32;
+
+void intToBytes( uint32 val, byte *pBytes )
+{
+    pBytes[0] = (byte)val;
+    pBytes[1] = (byte)(val >> 8);
+    pBytes[2] = (byte)(val >> 16);
+    pBytes[3] = (byte)(val >> 24);
+}
+
+uint32 GetInt32( byte *pBytes )
+{
+    return (uint32)(*(pBytes + 3) << 24 | *(pBytes + 2) << 16 | *(pBytes + 1) << 8 | *pBytes);
+}
+
 
 char *trim(char *s) {
     char *ptr;
@@ -48,7 +64,7 @@ int main(int argc, char **argv) {
         
          printf("finished tramp init\n");
         //Before writing to shared memory get the chat message in this string
-        char *message = (char *) malloc(size_msg);
+        char *message = (char *) malloc(size_msg*pageSize);
         
         //File pointer to be read
         FILE *fd;
@@ -79,7 +95,7 @@ int main(int argc, char **argv) {
 //		size_msg = 8;
 //		++count;
 		// First byte is sequence number. Rest is chat.
-		fgets(message, size_msg, stdin);
+		fgets(message, size_msg*100, stdin);
                 //If the chat message starts with send start sending the file
                 if(strncmp(message, "send", strlen("send")) == 0)
                 {
@@ -97,25 +113,39 @@ int main(int argc, char **argv) {
                     fseek(fd, 0, SEEK_SET);
                     //First send the file size
                     printf("file open complete\n");
-                    printf("file_size: %d file_name: %s\n", fileLen, filename);
-                    sprintf(chat_msg+1, "file:%d|%s", fileLen, filename);
+           
+                    if(strrchr(filename, '/')!= NULL)
+                        sprintf(chat_msg+1, "file:%d|%s", fileLen, strrchr(filename, '/')+1);
+                    else
+                        sprintf(chat_msg+1, "file:%d|%s", fileLen, filename);
                     *chat_msg = ++counter;
+                    if(strrchr(filename, '/')!= NULL)
+                        printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, strrchr(filename, '/')+1);
+                    else
+                        printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, filename);
                     int bytes_sent = 0;
+                    sleep(2);
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
-                        int bytes_read = fread(chat_msg+1,1,(2*pageSize),fd);
-                        chat_msg[1] = bytes_read;
-                        printf("Bytes read : %d\n", bytes_read);
+                        uint32 bytes_read = fread(chat_msg+5,1,pageSize*size_msg-5,fd);
+//                        memcpy(chat_msg+5,message,bytes_read);
+                        intToBytes(bytes_read, chat_msg+1);
+                        printf("num bytes from the chat_msg: %u\n", GetInt32(chat_msg+1));
                         bytes_sent += bytes_read;
-                        chat_msg[pageSize-1]='\0';
                         *chat_msg = ++counter;
-                        if(bytes_sent >= fileLen)
+                        printf("seq: %d  Bytes read : %u\n", counter, bytes_read);
+                        if(bytes_sent >= fileLen){
+                            printf("all bytes sent\n");
                             break;
-                        sleep(2);
+                        }
+                        sleep(1);
 
                          if (bytes_read == 0) // We're done reading from the file
-                                break;
+                         {
+                             printf("0 bytes read");
+                             break;
+                         }
                         if(bytes_read < 0)
                         {
                             printf("Error reading file %s, error code: %d \n", filename, bytes_read);
