@@ -17,21 +17,22 @@
 % ONE 'self-contained' source file.
 %
 
-\documentclass{acm_proc_article-sp}
+\documentclass[12pt, conference, compsocconf, letterpaper]{IEEEtran}
 %\documentclass{sig-alternate}
 
 %\usepackage{amssymb}
 \usepackage{algorithmic,algorithm, graphicx}
 \usepackage{paralist}
 \usepackage{url}
+\usepackage{authblk}
   
 \newcommand{\dims}{\mathsf{d}}
 
-\DeclareMathOperator*{\argmin}{arg\,min}
+%\DeclareMathOperator*{\argmin}{arg\,min}
 
 \begin{document}
 
-\title{State Exchange in Distributed Applications}
+\title{INF5090/9090\\State Exchange in Distributed Applications}
 
 %\subtitle{[Extended Abstract]
 %\titlenote{A full version of this paper is available as
@@ -63,12 +64,30 @@
 % without further effort on your part as the last section in
 % the body of your article BEFORE References or any Appendices.
 
-\numberofauthors{3} %  in this sample file, there are a *total*
+%\numberofauthors{3} %  in this sample file, there are a *total*
 % of EIGHT authors. SIX appear on the 'first-page' (for formatting
 % reasons) and the remaining two appear in the \additionalauthors section.
 %
-\author{}
+\author{
+	Magnus Evensberget\\
+	Institute of Informatics\\
+	University of Oslo\\
+	magnusev@ifi.uio.no
+\and
+	Vinay Setty\\
+	Institute of Informatics\\
+	University of Oslo\\
+	EMAILHERE@ifi.uio.no
+\and
+	Ramesh Shiraddi\\
+	Institute of Informatics\\
+	University of Oslo\\
+	EMAILHERE@ifi.uio.no
+}
 
+%\author{Vinay Setty}
+
+%\author{Magnus Evensberget}
 
 \maketitle
 \begin{abstract}
@@ -77,11 +96,11 @@ The goal of the assignment is to design and implement at least two components (p
 \end{abstract}
 
 % A category with the (minimum) three required fields
-\category{H.4}{Information Systems Applications}{Miscellaneous}
+%\category{H.4}{Information Systems Applications}{Miscellaneous}
 %A category including the fourth, optional field follows...
 %\category{D.2.8}{Software Engineering}{Metrics}[complexity measures, performance measures]
 
-\terms{Design, Experimentation, Performance, Measurement}
+%\terms{Design, Experimentation, Performance, Measurement}
 
 
 
@@ -107,6 +126,6 @@ The goal of the assignment is to design and implement at least two components (p
 \bibliography{main}  
 
 
-\balancecolumns
+%\balancecolumns
 
 \end{document}
