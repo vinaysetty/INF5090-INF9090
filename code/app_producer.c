@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
-                        uint32 bytes_read = fread(chat_msg+5,1,pageSize*size_msg-5,fd);
+                        uint32 bytes_read = fread(chat_msg+5,1,pageSize,fd);
 //                        memcpy(chat_msg+5,message,bytes_read);
                         intToBytes(bytes_read, chat_msg+1);
                         printf("num bytes from the chat_msg: %u\n", GetInt32(chat_msg+1));
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
                             printf("all bytes sent\n");
                             break;
                         }
-                        sleep(1);
+//                        sleep(1);
 
                          if (bytes_read == 0) // We're done reading from the file
                          {

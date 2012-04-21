@@ -115,56 +115,56 @@ int main(int argc, char **argv) {
                 uint32 bytes = GetInt32(chat_msg+1);
                 printf("size of packet %u\n", bytes);
             }
-                        if(strncmp(message, "file:", strlen("file:")) == 0)
-                        {
-                            printf("got file header\n");
-                            char *substr = strstr(message, "|");
-                            printf("%s\n", substr);
-                            temp_str = substring(5, substr-message, message);
-                            printf("%s\n", temp_str);
-                            file_size = atoi(temp_str);
-                            free(temp_str);
-                            temp_str = NULL;
-                            file_name = substring(0, strlen(substr+1), substr+1);
-                            printf("%s,%d\n",trim(file_name), file_size);
-                            char * full_file_name = (char *)malloc(strlen(file_name)+ strlen("./downloads/")+1);
-                            strcpy(full_file_name, "./downloads/");
-                            fd = fopen(strcat(full_file_name,file_name), "wb+");
-                            free(file_name);
-                            free(full_file_name);
-                            full_file_name = NULL;
-                            file_name = NULL;
-                            continue;
-                        }
-                        
-                        if(file_size >= 0)
-                        {
-                         
-//                             printf("num bytes in hex%x%x%x%x\n", message, message+1, message+2,message+3);
+//                        if(strncmp(message, "file:", strlen("file:")) == 0)
+//                        {
+//                            printf("got file header\n");
+//                            char *substr = strstr(message, "|");
+//                            printf("%s\n", substr);
+//                            temp_str = substring(5, substr-message, message);
+//                            printf("%s\n", temp_str);
+//                            file_size = atoi(temp_str);
+//                            free(temp_str);
+//                            temp_str = NULL;
+//                            file_name = substring(0, strlen(substr+1), substr+1);
+//                            printf("%s,%d\n",trim(file_name), file_size);
+//                            char * full_file_name = (char *)malloc(strlen(file_name)+ strlen("./downloads/")+1);
+//                            strcpy(full_file_name, "./downloads/");
+//                            fd = fopen(strcat(full_file_name,file_name), "wb+");
+//                            free(file_name);
+//                            free(full_file_name);
+//                            full_file_name = NULL;
+//                            file_name = NULL;
+//                            continue;
+//                        }
+//                        
+//                        if(file_size >= 0)
+//                        {
+//                         
+////                             printf("num bytes in hex%x%x%x%x\n", message, message+1, message+2,message+3);
+////                            uint32 bytes = GetInt32(message);
 //                            uint32 bytes = GetInt32(message);
-                            uint32 bytes = GetInt32(message);
-                            printf("size of packet %u\n", bytes);
-                            bytes_rcvd += fwrite(message+4, 1, bytes, fd);
-                            printf("received so far: %d bytes \n", bytes_rcvd);                            
-                            fflush(fd);
-                            if(bytes_rcvd == file_size)
-                            {
-                                file_size = -1;
-                                fclose(fd);
-                                bytes_rcvd = 0;
-                            }
-                            
-                            continue;
-                        }
-                        
-			// Print the message to screen witch fancy smancy colors
-			printf("%c[%d;%dm", 27, 1, 32);
-			printf("[%u] ", counter);
-			printf("%c[%d;%dm", 27, 1, 35);
-			printf("<%s> ", chat_usr);
-			printf("%c[%d;%dm", 27, 1, 37);
-			printf("%s", chat_msg + 1);
-			printf("%c[%dm\n", 27, 0);
+//                            printf("size of packet %u\n", bytes);
+//                            bytes_rcvd += fwrite(message+4, 1, bytes, fd);
+//                            printf("received so far: %d bytes \n", bytes_rcvd);                            
+//                            fflush(fd);
+//                            if(bytes_rcvd == file_size)
+//                            {
+//                                file_size = -1;
+//                                fclose(fd);
+//                                bytes_rcvd = 0;
+//                            }
+//                            
+//                            continue;
+//                        }
+//                        
+//			// Print the message to screen witch fancy smancy colors
+//			printf("%c[%d;%dm", 27, 1, 32);
+//			printf("[%u] ", counter);
+//			printf("%c[%d;%dm", 27, 1, 35);
+//			printf("<%s> ", chat_usr);
+//			printf("%c[%d;%dm", 27, 1, 37);
+//			printf("%s", chat_msg + 1);
+//			printf("%c[%dm\n", 27, 0);
 		}
 
 	}
