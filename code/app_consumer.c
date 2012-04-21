@@ -3,6 +3,9 @@
 #include <fcntl.h>
 #define EVER ;;
 
+typedef unsigned char byte;
+typedef unsigned int uint32;
+
 char *trim(char *s) {
     char *ptr;
     if (!s)
@@ -14,12 +17,31 @@ char *trim(char *s) {
     return s;
 }
 
+uint32 GetInt32( byte *pBytes )
+{
+    return (uint32)(*(pBytes + 3) << 24 | *(pBytes + 2) << 16 | *(pBytes + 1) << 8 | *pBytes);
+}
+
+void *writeFile(void *threadid){
+    long tid;
+    tid = (long)threadid;
+    printf("THREAD[%ld]: Hello world from thread: %ld\n", tid, tid);
+    sleep(5);
+    printf("THREAD[%ld]: I'm done\n", tid);
+    pthread_exit(NULL);
+}
+
 char* substring(int start, int stop, const char *text)
 {
     char *substring = (char *)(malloc(stop - start+1));
     printf("%d, %d, %s\n",start, stop, text);
    sprintf(substring, "%.*s\n", stop - start, &text[start]);
    return substring;
+}
+
+int createFolder(char* folder_name)
+{
+    return mkdir(folder_name);
 }
 
 int main(int argc, char **argv) {
@@ -55,7 +77,7 @@ int main(int argc, char **argv) {
 	//                                                            |N|I|C|K|...|
 	// I.e. all the bytes are chatachter of the nickname
 	char *chat_usr = (char *) tramp_initialize(label_usr, size_usr);
-    char *message = (char *) malloc(pageSize);
+    char *message = (char *) malloc(size_msg*pageSize);
 	// Get the nickname once
 	tramp_get(label_usr, size_usr);
 
@@ -67,6 +89,11 @@ int main(int argc, char **argv) {
 	printf("Waiting for messages from %s...", chat_usr);
 	printf("%c[%dm\n", 27, 0);
 
+    if(createFolder("./downloads") != 0)
+    {
+        printf("Failed to create folder downloads\n");
+        
+    }
 	for(EVER) {
 		// Check for new messages. This is either because of higher sequence number or because unsinged char has wrapped
 		if(((unsigned char) *chat_msg > counter) || (counter == 255 && (unsigned char) *chat_msg == 1)) {
@@ -74,11 +101,20 @@ int main(int argc, char **argv) {
 			// Update sequence number
 			counter = (unsigned char) *chat_msg;
 
-			// Remove enter chatachter
-			if(chat_msg[strlen(chat_msg) - 1] == '\n') {
-				chat_msg[strlen(chat_msg) - 1] = '\0';
-			}
-            strcpy(message,chat_msg+1);
+//			// Remove enter chatachter
+//			if(chat_msg[strlen(chat_msg) - 1] == '\n') {
+//				chat_msg[strlen(chat_msg) - 1] = '\0';
+//			}
+
+            memcpy(message,chat_msg+1,size_msg*pageSize-1);
+            
+            printf("Seq: %d\n", counter);
+            if(file_size >= 0)
+            {
+                
+                uint32 bytes = GetInt32(chat_msg+1);
+                printf("size of packet %u\n", bytes);
+            }
                         if(strncmp(message, "file:", strlen("file:")) == 0)
                         {
                             printf("got file header\n");
@@ -91,16 +127,25 @@ int main(int argc, char **argv) {
                             temp_str = NULL;
                             file_name = substring(0, strlen(substr+1), substr+1);
                             printf("%s,%d\n",trim(file_name), file_size);
-                            fd = fopen(strcat(file_name,"_rcvd"), "wb+");
+                            char * full_file_name = (char *)malloc(strlen(file_name)+ strlen("./downloads/")+1);
+                            strcpy(full_file_name, "./downloads/");
+                            fd = fopen(strcat(full_file_name,file_name), "wb+");
                             free(file_name);
+                            free(full_file_name);
+                            full_file_name = NULL;
                             file_name = NULL;
                             continue;
                         }
                         
                         if(file_size >= 0)
                         {
-                            bytes_rcvd += fwrite(message, 1, strlen(message), fd);
-                            printf("received so far: %d bytes \n", bytes_rcvd);
+                         
+//                             printf("num bytes in hex%x%x%x%x\n", message, message+1, message+2,message+3);
+//                            uint32 bytes = GetInt32(message);
+                            uint32 bytes = GetInt32(message);
+                            printf("size of packet %u\n", bytes);
+                            bytes_rcvd += fwrite(message+4, 1, bytes, fd);
+                            printf("received so far: %d bytes \n", bytes_rcvd);                            
                             fflush(fd);
                             if(bytes_rcvd == file_size)
                             {
@@ -109,8 +154,6 @@ int main(int argc, char **argv) {
                                 bytes_rcvd = 0;
                             }
                             
-                            free(message);
-                            message = (char *) malloc(pageSize);
                             continue;
                         }
                         
