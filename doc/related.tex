@@ -16,6 +16,15 @@ The skype arcitecture is designed around three entities: Supernodes, regular nod
 
 This is something that might be implemented in TRAMP to scale up the network. 
 
-\subsection{P2P Multicasting}
+\subsection{P2P streaming}
+P2P streaming works by having all nodes in the network relay the stream to other nodes, thereby reducing the upload link needed by the sourcenode, as it does not need to upload the stream to all connected nodes. SopCast is such a application.
 
-%talk about a streaming application (pref p2p udp and tcp and what is trades / tradeoffs when using the different
+SopCast is a P2P streaming application developed as a student project at Fundan University in China in 2005  and has become a very popular way to watch live video streams. The name SopCast is short for ``Streaming over P2P Cast'', and the protocol used is built by the SopCast team.\cite{P2P_Video_Streaming}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=250pt]{SopCastArchitecture.png}
+ \caption{SopCast Arcitecture}
+ % SopCastArchitecture.png: 755x393 pixel, 150dpi, 12.78x6.65 cm, bb=0 0 362 189
+\end{figure}
+
