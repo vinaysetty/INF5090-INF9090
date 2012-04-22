@@ -172,7 +172,7 @@ void *server_listen() {
 
 void *connection(void *socket) {
 	int sockfd = * (int *) socket;
-
+    int p_index = peer_index(socket);
 	sockets[peers - 1] = sockfd;
 
 	char buffer[1400];
@@ -269,7 +269,7 @@ void *connection(void *socket) {
 			#endif
 
 			handle_dat_message(sockfd, result);
-			continue;
+            continue;
 		}
 
 		fprintf(stderr, "Unknown message '%s'!\n", buffer);
@@ -279,6 +279,10 @@ void *connection(void *socket) {
 }
 
 void *data(void *message) {
+    
+    struct timeval data_timestamp;
+    // Set timestamp for calculating delay
+	gettimeofday(&data_timestamp, NULL);
 	#ifdef DEBUG
 		printf("Message is '%s'.\n", (char *) message);
 	#endif
@@ -294,7 +298,11 @@ void *data(void *message) {
 	size = (size_t) atoi(strtok(NULL, ";"));
 	socket = (int) atoi(strtok(NULL, ";"));
 	key_t key = strtol(label, NULL, 36);
-
+    int p_index = peer_index(socket);
+	if(p_index == -1) {
+		fprintf(stderr, "Unknown socket '%d'. Not expecting delay measurement.\n", socket);
+		return;
+	}
 	// Locate the data segment
 	shmid = shmget(key, size, SHM_R);
 	if(shmid < 0) {
@@ -323,6 +331,9 @@ void *data(void *message) {
 	for(EVER) {
 
 		if(memcmp(shm, reply + length_of_header, strlen(shm)) != 0) {
+            int seq = *shm;
+            msg_delay[p_index][seq] = data_timestamp.tv_usec;
+            printf("%d, %d, %u\n", p_index, data_timestamp.tv_usec, seq);
 			bzero(reply, MSG_SIZE);
 			sprintf(reply, "DAT;%s;%lu;%s", label, size, shm);
 			send_message(socket, reply);
@@ -378,6 +389,14 @@ void handle_dat_message(int socket, char *message) {
 	}
 
 	sprintf(shm, "%s", (char *) data);
+
+    struct timeval data_timestamp;
+    // Set timestamp for calculating delay
+    gettimeofday(&data_timestamp, NULL);
+    unsigned int seq = (*shm)+1;
+    int p_index = peer_index(socket);
+    msg_delay[p_index][seq] = (data_timestamp.tv_usec - msg_delay[p_index][seq]) / 2;
+    printf("msg delay %d\n", msg_delay[p_index][seq]);
 
 	#ifdef DEBUG
 		printf("Contents for '%s' with key '%x' of size '%lu' is set.\n", label, key, size);

@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
                     else
                         printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, filename);
                     int bytes_sent = 0;
-                    sleep(2);
+//                    sleep(2);
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
