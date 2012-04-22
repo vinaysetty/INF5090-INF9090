@@ -2,8 +2,13 @@
 \label{sec:optimizations}
 
 \subsection{Shared Memory problem}
+REWRITE NEEDED
+Shared memory is memory that can be used to pass data between cores, or to other applications. As the applications or cores can access the data just as any other data in the Random Access Memory (RAM) its a very fast way of passing data between the applications, compared to regular message passing or software implementations such as UNIX domain sockets or CORBA. But it is less powerful, as all the processes has to run on the same machine.
+
+At the moment TRAMP is using shared memory for inter-process communication (IPC). It allocates 32mb of memory, but the problem we've found is that we get a lot of packetloss due to the producer being faster than the consumers. This problem occours when we are trying to send a file over the platform. The problem with the file sending is ofcourse that the platform tries to send it as quickly as possible, where usual real-time applications such as skype sends a video stream that is not the total bandwidth, but 400kbps-1mbps (voice streams will be lower than this).
+
 At the moment TRAMP is using shared memory in order to transfer data. TRAMP allocates 32mb
-major security problems
+major security problems\cite{shared_memory}
 
 \subsection{Data transfer rate}
 Pushing more data than the recieving nodes can pull
@@ -12,7 +17,7 @@ Pushing more data than the recieving nodes can pull
 atm mesh network, should be something else
 
 \subsection{UDP vs TCP or both}
-
+TODO: Real time transport protocol (RTP)
 
 
 
