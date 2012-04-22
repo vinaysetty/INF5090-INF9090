@@ -83,6 +83,10 @@ int main(int argc, char **argv) {
 
 	// Get the messages continous
 	tramp_subscribe(label_msg, size_msg);
+    
+    //Hack to send the reply back to measure delay
+    tramp_publish(label_msg, size_msg);
+	tramp_publish(label_usr, size_usr);
 
 	// Print waiting message to screen
 	printf("%c[%d;%dm", 27, 1, 34);
@@ -115,6 +119,7 @@ int main(int argc, char **argv) {
                 uint32 bytes = GetInt32(chat_msg+1);
                 printf("size of packet %u\n", bytes);
             }
+            *chat_msg = (counter-1);
 //                        if(strncmp(message, "file:", strlen("file:")) == 0)
 //                        {
 //                            printf("got file header\n");
