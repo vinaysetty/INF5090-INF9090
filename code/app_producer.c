@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 	if((unsigned char) *chat_msg > 0 && (unsigned char) *chat_msg <= 255) {
 		counter = (unsigned char) *chat_msg;
 	}
+    int numPacketsSent = 0;
 	for(EVER) {
 		// Prompt user for input
 		printf("<%s> ", chat_usr);
@@ -119,6 +120,7 @@ int main(int argc, char **argv) {
                     else
                         sprintf(chat_msg+1, "file:%d|%s", fileLen, filename);
                     *chat_msg = ++counter;
+                    numPacketsSent++;
                     if(strrchr(filename, '/')!= NULL)
                         printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, strrchr(filename, '/')+1);
                     else
@@ -128,18 +130,23 @@ int main(int argc, char **argv) {
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
-                        uint32 bytes_read = fread(chat_msg+5,1,pageSize,fd);
-//                        memcpy(chat_msg+5,message,bytes_read);
+                        uint32 bytes_read = fread(message,1,size_msg*pageSize-5,fd);
+                        memcpy(chat_msg+5,message,bytes_read);
                         intToBytes(bytes_read, chat_msg+1);
                         printf("num bytes from the chat_msg: %u\n", GetInt32(chat_msg+1));
                         bytes_sent += bytes_read;
                         *chat_msg = ++counter;
+                        numPacketsSent++;
                         printf("seq: %d  Bytes read : %u\n", counter, bytes_read);
                         if(bytes_sent >= fileLen){
+                            usleep(500);
                             printf("all bytes sent\n");
+                            printf("num packets sent: %d", numPacketsSent);
+                            *chat_msg = 'F';
                             break;
                         }
-//                        sleep(1);
+                        //sleep for 500ms
+                        usleep(500);
 
                          if (bytes_read == 0) // We're done reading from the file
                          {
@@ -157,6 +164,7 @@ int main(int argc, char **argv) {
                 {
                     strcpy(chat_msg+1, message);
                         *chat_msg = ++counter;
+                    numPacketsSent++;
                 }
 		printf("%d size: ", size_msg);
 		// First byte is sequence number

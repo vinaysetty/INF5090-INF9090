@@ -19,7 +19,7 @@ app: lib
 	@echo "Compiling producer application..."
 	@$(CC) $(FLAGS) app_producer.c -o app_producer `pkg-config --cflags --libs dbus-1` -L. -ltramp -I.
 	@echo "Compiling consumer application..."
-	@$(CC) $(FLAGS) app_consumer.c -o app_consumer `pkg-config --cflags --libs dbus-1` -L. -ltramp -I.
+	@$(CC) $(FLAGS) app_consumer.c -o app_consumer `pkg-config --cflags --libs dbus-1` -L. -ltramp  -I.
 
 clean:
 	@echo "Cleaning..."

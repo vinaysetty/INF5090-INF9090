@@ -271,6 +271,15 @@ void *connection(void *socket) {
 			handle_dat_message(sockfd, result);
             continue;
 		}
+        if(strcmp(result, "ACK") == 0) {
+			result = strtok(NULL, "");
+            #ifdef DEBUG
+                printf("Incoming ACK on socket '%d'. Result is '%s'.\n", sockfd, result);
+            #endif
+            
+			handle_ack_message(sockfd, result);
+			continue;
+		}
 
 		fprintf(stderr, "Unknown message '%s'!\n", buffer);
 	}
@@ -278,11 +287,34 @@ void *connection(void *socket) {
 	pthread_exit(NULL);
 }
 
+
+
+void handle_ack_message(int socket, char *message)
+{
+	char* label = NULL;
+	char *data = NULL;
+	size_t size = -1;
+    label = strtok(message, ";");
+    size = (size_t) atoi(strtok(NULL, ";"));
+	data = strtok(NULL, ";");
+    struct timeval data_timestamp;
+    // Set timestamp for calculating delay
+    gettimeofday(&data_timestamp, NULL);
+    unsigned char seq = (*data);
+//    printf("seq=%d\n", seq);
+    int p_index = peer_index(socket);
+//    printf("%d,%d\n", p_index, seq);
+    msg_delay[p_index][seq] = (data_timestamp.tv_usec - msg_delay[p_index][seq]) / 2;
+//    printf("timestamp %d msg delay %d\n", data_timestamp.tv_usec, msg_delay[p_index][seq]);
+    total_delay[p_index] += msg_delay[p_index][seq]; 
+    msg_delay[p_index][seq] = 0;
+
+}
+
 void *data(void *message) {
     
     struct timeval data_timestamp;
     // Set timestamp for calculating delay
-	gettimeofday(&data_timestamp, NULL);
 	#ifdef DEBUG
 		printf("Message is '%s'.\n", (char *) message);
 	#endif
@@ -326,14 +358,37 @@ void *data(void *message) {
 	// TODO: FIXME: Do this smarter
 	sprintf(reply, "DAT;%s;%lu;", label, size);
 	int length_of_header = strlen(reply);
-	printf("Length of header: '%d'\n", length_of_header);
-
+    #ifdef DEBUG
+        printf("Length of header: '%d'\n", length_of_header);
+    #endif
+    int prevseq = *(reply + length_of_header);
 	for(EVER) {
-
+//        printf("seq %d %d\n", *shm, *(reply + length_of_header));
 		if(memcmp(shm, reply + length_of_header, strlen(shm)) != 0) {
-            int seq = *shm;
-            msg_delay[p_index][seq] = data_timestamp.tv_usec;
-            printf("%d, %d, %u\n", p_index, data_timestamp.tv_usec, seq);
+            char seq_char = *shm;
+            if(seq_char == 'F')
+            {
+                printf("Printing total delays \n");
+                int i = 0;
+                for (i = 0; i < 100; ++i) {
+                    if (total_delay[i] > 0) {
+                        printf("%d %d\n", i, total_delay[i]);
+                    }
+                }
+                break;
+            }
+            gettimeofday(&data_timestamp, NULL);
+            unsigned char seq = *shm;
+            #ifdef DEBUG
+                printf("%d,%d\n", p_index, seq);
+            #endif
+            if(seq != prevseq){
+                msg_delay[p_index][seq] = data_timestamp.tv_usec;
+                prevseq = seq;
+            }
+            #ifdef DEBUG
+                printf("%d, %d, %u\n", p_index, data_timestamp.tv_usec, seq);
+            #endif
 			bzero(reply, MSG_SIZE);
 			sprintf(reply, "DAT;%s;%lu;%s", label, size, shm);
 			send_message(socket, reply);
@@ -387,20 +442,23 @@ void handle_dat_message(int socket, char *message) {
 		fprintf(stderr, "Could not attach data segment!\n");
 		return;
 	}
-
+    unsigned char seq = *((char *) data); 
 	sprintf(shm, "%s", (char *) data);
 
-    struct timeval data_timestamp;
-    // Set timestamp for calculating delay
-    gettimeofday(&data_timestamp, NULL);
-    unsigned int seq = (*shm)+1;
-    int p_index = peer_index(socket);
-    msg_delay[p_index][seq] = (data_timestamp.tv_usec - msg_delay[p_index][seq]) / 2;
-    printf("msg delay %d\n", msg_delay[p_index][seq]);
+    send_dat_ack(socket, data);
+   
 
 	#ifdef DEBUG
 		printf("Contents for '%s' with key '%x' of size '%lu' is set.\n", label, key, size);
 	#endif
+}
+
+void send_dat_ack(int socket, char* data) {
+    char *reply = (char *) malloc(MSG_SIZE);
+	bzero(reply, MSG_SIZE);
+	sprintf(reply, "ACK;%s;%lu;%s", "ChatMSG", 80, data);
+	send_message(socket, reply);
+	free(reply);
 }
 
 void handle_fet_message(int socket, char *message) {
@@ -499,6 +557,9 @@ void handle_yep_message(int socket, char *message) {
 	delay[l_index][p_index] = from_origin + (timestamp.tv_usec - delay[l_index][p_index]) / 2;
 	print_delays();
 }
+
+
+
 
 void handle_get_message(int socket, char *message) {
 	char *shm;

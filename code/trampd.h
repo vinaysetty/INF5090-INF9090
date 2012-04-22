@@ -43,6 +43,7 @@ unsigned int total_labels = 0;
 unsigned int total_own_labels = 0;
 int		delay[MAX_LABELS][MAX_PEERS] = { {-1} };
 int msg_delay[MAX_PEERS][256] = { {-1} };
+int total_delay[MAX_PEERS];
 
 int label_index(char *label);
 int peer_index(int socket);
@@ -55,6 +56,7 @@ void handle_yep_message(int socket, char *message);
 void handle_fet_message(int socket, char *message);
 void handle_fetc_message(int socket, char *message);
 void handle_dat_message(int socket, char *message);
+void handle_ack_message(int socket, char *message);
 
 // RPC handlers
 void handle_rpc_publish(DBusMessage *msg, DBusConnection *conn);
@@ -64,3 +66,4 @@ void handle_rpc_subscribe(DBusMessage *msg, DBusConnection *conn);
 // Debug
 void print_labels();
 void print_delays();
+void send_dat_ack();
