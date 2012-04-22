@@ -3,12 +3,12 @@
 
 \subsection{Shared Memory problem}
 REWRITE NEEDED
-Shared memory is memory that can be used to pass data between cores, or to other applications. As the applications or cores can access the data just as any other data in the Random Access Memory (RAM) its a very fast way of passing data between the applications, compared to regular message passing or software implementations such as UNIX domain sockets or CORBA. But it is less powerful, as all the processes has to run on the same machine.
+Shared memory is memory that can be used to pass data between cores, or to other applications. As the applications or cores can access the data just as any other data in the Random Access Memory (RAM) its a very fast way of passing data between the applications, compared to regular message passing or software implementations such as UNIX domain sockets or CORBA. But it is less powerful, as all the processes has to run on the same machine.\cite{shared_memory}
 
 At the moment TRAMP is using shared memory for inter-process communication (IPC). It allocates 32mb of memory, but the problem we've found is that we get a lot of packetloss due to the producer being faster than the consumers. This problem occours when we are trying to send a file over the platform. The problem with the file sending is ofcourse that the platform tries to send it as quickly as possible, where usual real-time applications such as skype sends a video stream that is not the total bandwidth, but 400kbps-1mbps (voice streams will be lower than this).
 
-At the moment TRAMP is using shared memory in order to transfer data. TRAMP allocates 32mb
-major security problems\cite{shared_memory}
+
+TODO: major security problems :TODO
 
 \subsection{Data transfer rate}
 Pushing more data than the recieving nodes can pull
@@ -16,8 +16,19 @@ Pushing more data than the recieving nodes can pull
 \subsection{Network topology}
 atm mesh network, should be something else
 
-\subsection{UDP vs TCP or both}
-TODO: Real time transport protocol (RTP)
+\subsection{UDP vs TCP}
+User Datagram Protocol (UDP) was designed by David P- Reed in 1980, and defined in RFC768. UDP allows computer applications to send messages, or datagrams, to other hosts on an Internet Protocol(IP) without a setup phase like in Transmission Control Protocol(TCP). This stateless nature is also good for servers answering small queries from many clients. UDP also suport packet broadcast (sending packets to all hosts on a local network) and multicasting (subscriber based).
+
+UDP does not guarantee that the packet you sent ends up at the host. Neither does it support packet ordering (that packets reach the reciever in the correct order). This is what TCP is for. TCP was specified in RFC675 in December 1974. This protocol uses a three-way handshake in order to set up a connection between two hosts. It also provides reliable transmission, error detection, flow control and congestion control. 
+
+\subsubsection{Real-time Transport Protocol}
+The Real-time Transport Protocol (RTP) is a protocol developed by the Audio-Video Transport Working Group for the Ineternet Engineering Task Force (IETF). The first published RFC was published in 1996 with the code RFC1889. This was made obselete by the newer RFC3550, published in 2003\cite{RFC3550}. This protocol is built on top of UDP and therefore does not provide Quality of Service (QoS) guarantees like delivery or packet order. The RPT standard defines two protocols. RTP and RTP Control Protocol (RTCP). This protocol provides QoS to the RTP protocol.
+
+``RTP provides end-to-end network transport functions suitable for applications transmitting real-time data, such as audio, video or simulation data, over multicast or unicast network services.``\cite{RFC3550}
+
+Due to the real-time nature of this protocol the majority of RTP implementations is build on UDP, but there are some implementations using TCP.
+
+
 
 
 

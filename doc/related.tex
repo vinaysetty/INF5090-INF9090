@@ -17,9 +17,9 @@ The skype arcitecture is designed around three entities: Supernodes, regular nod
 This is something that might be implemented in TRAMP to scale up the network. 
 
 \subsection{P2P streaming}
-P2P streaming works by having all nodes in the network relay the stream to other nodes, thereby reducing the upload link needed by the sourcenode, as it does not need to upload the stream to all connected nodes. SopCast is such a application.
+P2P streaming works by having all nodes in the network relay the stream to other nodes, thereby reducing the upload link needed by the sourcenode, as it does not need to upload the stream to all connected nodes. SopCast is such an application.
 
-SopCast is a P2P streaming application developed as a student project at Fundan University in China in 2005  and has become a very popular way to watch live video streams. The name SopCast is short for ``Streaming over P2P Cast'', and the protocol used is built by the SopCast team.\cite{P2P_Video_Streaming}
+SopCast is a P2P streaming application developed as a student project at Fundan University in China in 2005  and has become a very popular way to watch live video streams. The name SopCast is short for ``Streaming over P2P Cast'', and the protocol used is built by the SopCast team.\cite{P2P_Video_Streaming} The SopCast source code is propriatory, so as with Skype this information is based on observations and mesurements.
 
 \begin{figure}[h!]
  \centering
@@ -29,7 +29,12 @@ SopCast is a P2P streaming application developed as a student project at Fundan 
  \label{Figure:SopCast_Arcitecture}
 \end{figure}
 
-%Sopcast works by having a tracker with all public channels, 
+Sopcast works by having a tracker with all public channels allowing each node to have a list of available channels, it also keeps track of the chunk information created by the Streaming server. Each node consists of a Streaming engine, a Buffer and a Video application. The Streaming server is the special node that is recording the stream. this node is converting the video into segments of equal size, then pushing it out.
+
+SopCast uses a mesh-pull topology, this means that all peers has to pull the missing segments of the stream from their neighbours. Peers are adverticing what segments they have available via Buffer Maps.
+
+There are two buffers that SopCast maintains; the reciever buffer and the client buffer. The reciever buffer is a buffer for all the chunks pulled from neighbours, when this buffer is full SopCast launch a media player that uses the clients buffer to play the stream.
+
 
 
 
