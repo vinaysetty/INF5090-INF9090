@@ -128,9 +128,13 @@ int main(int argc, char **argv) {
                         printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, filename);
                     int bytes_sent = 0;
                     sleep(2);
+                    struct timeval t1;
+                    // Set timestamp for calculating delay
+                    gettimeofday(&t1, NULL);
 //                    usleep(100000);
                     while(1)
                     {
+           
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
                         uint32 bytes_read = fread(message,1,size_msg*pageSize-5,fd);
                         memcpy(chat_msg+5,message,bytes_read);
@@ -142,14 +146,14 @@ int main(int argc, char **argv) {
                         printf("seq: %d  Bytes read : %u\n", counter, bytes_read);
                         if(bytes_sent >= fileLen){
 //                            numPacketsSent = 0;
-                            usleep(100000);
+//                            usleep(100000);
                             printf("all bytes sent\n");
                             printf("num packets sent: %d, bytes: %d ", numPacketsSent, bytes_sent);
 //                            *chat_msg = 255;
                             break;
                         }
                         //sleep for 500ms
-                        usleep(100000);
+                        usleep(500000);
 
                          if (bytes_read == 0) // We're done reading from the file
                          {
@@ -161,7 +165,13 @@ int main(int argc, char **argv) {
                             printf("Error reading file %s, error code: %d \n", filename, bytes_read);
                             break;
                         }
+                       
+                        
                     }
+                    struct timeval t2;
+                    // Set timestamp for calculating delay
+                    gettimeofday(&t2, NULL);
+                    printf("processing delay: %f\n", (double)((double)t2.tv_usec-(double)t1.tv_usec)/2);
                 }
                 else
                 {

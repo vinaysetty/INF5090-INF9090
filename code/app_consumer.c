@@ -109,7 +109,10 @@ int main(int argc, char **argv) {
 //			if(chat_msg[strlen(chat_msg) - 1] == '\n') {
 //				chat_msg[strlen(chat_msg) - 1] = '\0';
 //			}
-
+            
+            struct timeval t1;
+            // Set timestamp for calculating delay
+            gettimeofday(&t1, NULL);
             memcpy(message,chat_msg+1,size_msg*pageSize-1);
             
             printf("Seq: %d\n", counter);
@@ -157,9 +160,15 @@ int main(int argc, char **argv) {
                                 printf("Number of packets received: %d", numPackets);
 
                             }
-                            
+                                                        
+                            struct timeval t2;
+                            // Set timestamp for calculating delay
+                            gettimeofday(&t2, NULL);
+                            printf("processing delay: %f\n", (double)((double)t2.tv_usec-(double)t1.tv_usec)/2);
                             continue;
+
                         }
+          
                         
 			// Print the message to screen witch fancy smancy colors
 			printf("%c[%d;%dm", 27, 1, 32);
