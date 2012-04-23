@@ -96,6 +96,7 @@ int main(int argc, char **argv) {
 //		size_msg = 8;
 //		++count;
 		// First byte is sequence number. Rest is chat.
+       
 		fgets(message, size_msg*100, stdin);
                 //If the chat message starts with send start sending the file
                 if(strncmp(message, "send", strlen("send")) == 0)
@@ -126,7 +127,8 @@ int main(int argc, char **argv) {
                     else
                         printf("seq: %d file_size: %d file_name: %s\n", counter, fileLen, filename);
                     int bytes_sent = 0;
-//                    sleep(2);
+                    sleep(2);
+//                    usleep(100000);
                     while(1)
                     {
                         printf("size of chat_msg: %d\n", sizeof(chat_msg));
@@ -139,14 +141,15 @@ int main(int argc, char **argv) {
                         numPacketsSent++;
                         printf("seq: %d  Bytes read : %u\n", counter, bytes_read);
                         if(bytes_sent >= fileLen){
-                            usleep(500);
+//                            numPacketsSent = 0;
+                            usleep(100000);
                             printf("all bytes sent\n");
-                            printf("num packets sent: %d", numPacketsSent);
-                            *chat_msg = 'F';
+                            printf("num packets sent: %d, bytes: %d ", numPacketsSent, bytes_sent);
+//                            *chat_msg = 255;
                             break;
                         }
                         //sleep for 500ms
-                        usleep(500);
+                        usleep(100000);
 
                          if (bytes_read == 0) // We're done reading from the file
                          {

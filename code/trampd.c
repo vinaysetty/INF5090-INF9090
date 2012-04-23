@@ -153,7 +153,7 @@ void *server_listen() {
 	for(EVER) {
 		client_sockfd = accept(sockfd, (struct sockaddr *) &client_addr, &addr_size);
 		if(client_sockfd != -1) {
-			printf("Received connection from %s\n", inet_ntoa(client_addr.sin_addr));
+			printf("Received connection from %s socketfd = %d\n", inet_ntoa(client_addr.sin_addr), client_sockfd);
 
 			#ifdef DEBUG
 				printf("Socket FD '%d'.\n", client_sockfd);
@@ -306,7 +306,7 @@ void handle_ack_message(int socket, char *message)
 //    printf("%d,%d\n", p_index, seq);
     msg_delay[p_index][seq] = (data_timestamp.tv_usec - msg_delay[p_index][seq]) / 2;
 //    printf("timestamp %d msg delay %d\n", data_timestamp.tv_usec, msg_delay[p_index][seq]);
-    total_delay[p_index] += msg_delay[p_index][seq]; 
+    total_delay[p_index] = total_delay[p_index] + msg_delay[p_index][seq]; 
     msg_delay[p_index][seq] = 0;
 
 }
@@ -365,17 +365,20 @@ void *data(void *message) {
 	for(EVER) {
 //        printf("seq %d %d\n", *shm, *(reply + length_of_header));
 		if(memcmp(shm, reply + length_of_header, strlen(shm)) != 0) {
-            char seq_char = *shm;
-            if(seq_char == 'F')
+            unsigned char seq_char = *shm;
+//            if(seq_char == 255)
             {
                 printf("Printing total delays \n");
                 int i = 0;
                 for (i = 0; i < 100; ++i) {
                     if (total_delay[i] > 0) {
-                        printf("%d %d\n", i, total_delay[i]);
+                        printf("%d %d %d %f %d\n", i, total_delay[i], num_messages[i], (double)((double)total_delay[i]/(double)num_messages[i]), sockets[i]);
+//                        total_delay[i] = 0;
                     }
                 }
-                break;
+//                bzero(reply, MSG_SIZE);
+//                sprintf(reply, "DAT;%s;%lu;%s", label, size, shm);
+//                continue;
             }
             gettimeofday(&data_timestamp, NULL);
             unsigned char seq = *shm;
@@ -384,6 +387,7 @@ void *data(void *message) {
             #endif
             if(seq != prevseq){
                 msg_delay[p_index][seq] = data_timestamp.tv_usec;
+                num_messages[p_index] = num_messages[p_index] + 1;
                 prevseq = seq;
             }
             #ifdef DEBUG
@@ -651,7 +655,7 @@ void print_delays() {
 	for(i = 0; i < total_labels; i++) {
 		for(j = 0; j < peers; j++) {
 			if(delay[i][j] != -1) {
-				printf("[%d][%d]='%d'\n", i, j, delay[i][j]);
+				printf("[%d][%d]='%d %d'\n", i, j, delay[i][j], sockets[j]);
 			}
 		}
 	}
@@ -701,8 +705,8 @@ void peer_connect(char *line) {
 	}
 
 	#ifdef DEBUG
-		printf("Socket FD '%d'.\n", sockfd);
-	#endif	
+		printf("Socket FD '%d' hostname: %s.\n", sockfd, line);
+    #endif	
 
 	ret = pthread_create(&peer_threads[peers++], NULL, connection, &sockfd);
 	if(ret != 0) {

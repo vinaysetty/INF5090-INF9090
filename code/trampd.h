@@ -43,7 +43,8 @@ unsigned int total_labels = 0;
 unsigned int total_own_labels = 0;
 int		delay[MAX_LABELS][MAX_PEERS] = { {-1} };
 int msg_delay[MAX_PEERS][256] = { {-1} };
-int total_delay[MAX_PEERS];
+int total_delay[MAX_PEERS] = {0};
+int num_messages[MAX_PEERS] = {0};
 
 int label_index(char *label);
 int peer_index(int socket);
