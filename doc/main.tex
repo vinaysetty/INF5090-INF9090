@@ -82,8 +82,8 @@
 
 \maketitle
 \begin{abstract}
-This assignment is part of the Real-time Application Mobility Platform (TRAMP) project with focus on distributed multimedia applications with real-time requirements.
-The goal of the assignment is to design and implement at least two components (producer and consumer) of a real-time application (such as a media player) and evaluate the provided distribution framework with respect to delay, throughput and other relevant metrics. Above is an overview of the provided framework. Your objective is to design and implement the producer and consumer application parts (the two gray components). The producer/consumer duo can run locally on one machine or be distributed over a network. In addition, multiple consumers can subscribe to the same produced data and receive identical copies.
+In this assignment we analyze and evaluate the Real-time Application Mobility Platform (TRAMP) project with focus on distributed multimedia applications with real-time requirements. 
+We design and implement two components (producer and consumer) of a real-time application (by simulating video streaming) and evaluate the provided distribution framework with respect to delay and packet loss. We analyze TRAMP and point out the weaknesses with the help of experiments. 
 \end{abstract}
 
 % A category with the (minimum) three required fields
@@ -108,7 +108,7 @@ The goal of the assignment is to design and implement at least two components (p
 \input{evaluation}
 
 \section{Conclusions}
-
+In this assignment we were able to use TRAMP framework to simulate a real time application. We did thorough analysis of TRAMP framework and made several interesting observations. Mainly, we observed that TRAMP starts with a mesh network topology which is not scalable as the number of peers in the network grow. The subscribers establish a routing tree by choosing the peer with lowest network delay as neighbors. This approach is flawed due to two reasons: (a) the tree may not give least delay path from producer to consumers (b) there is a possibility that the tree has disconnections. We observe this behavior by measuring the end-to-end delay from producer to the consumers. We also observed that since tramp daemon writes the packets to the shared memory and since there is no queuing mechanism at the consumer side it could result in a significant packet loss due to overwriting of packets in shared memory. We also concluded that this can be avoided by introducing around 500ms delay between sending of packets.
 %\section{Acknowledgments}
 
 

@@ -32,4 +32,7 @@ trampd.c         - Implementation of the TRAMP daemon.
 
 my-devices.cache - List of devices the TRAMP daemon uses for bootstrapping.
 
+To send a file from producer type 
+>send filename
+
 ================================================================================
