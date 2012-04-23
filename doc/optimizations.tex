@@ -15,7 +15,21 @@ As mentioned in section \ref{smp} we had a lot of packetloss due to the producer
 If the framework were to support filesharing we would have to add a control structure that would have the ability to tell the producer that the client cannot handle this ammount of packets, a way to tell the producer that the client can handle more and a way to ask for a retransmit of a spesific packet.
 
 \subsection{Network topology}
-When deciding on a network topology we need to know the scope and how we want the network to scale. If we want the network to be a global network like skype, the skype protocol is something to look at (see section \ref{skype})
+When deciding on a network topology we need to know the scope and how we want the network to scale. If we want people to be able to talk with single persons inside the network we need a protocol like the skype protocol (see section \ref{skype}.
+
+After looking into the TRAMP network topology we decided that what was partially implemented was a mesh-push network. We also noticed that the node chose one neighbor node that was the closest relative to the delay and subscribe to that node. This makes the node responsible for pushing all the packets he get from the spesific label to the new node. We've also noticed that this does not work exactly as planned, 
+
+\begin{center}
+ \begin{figure}[h!]
+  \includegraphics[width=250pt]{TrampNetworkTopology.png}
+  \caption{TRAMP Network Topology}
+  % TrampNetworkTopology.png: 436x309 pixel, 96dpi, 11.54x8.18 cm, bb=0 0 327 232
+  \label{tramp_topology}
+ \end{figure}
+\end{center}
+
+As we can see on figure \ref{tramp_topology} every node in the network connect to all the other nodes (the green lines), each node then chooses a ``closest neigbour'' to subscribe to (the red arrows). As you can see on the figure node 2 chooses node 3 and node 3 chooses node 2, this makes these nodes not in reach of the source node (the producer).
+
 
 atm mesh-push network.
 
