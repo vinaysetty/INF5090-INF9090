@@ -1,0 +1,7 @@
+Vinay Setty:
+Done coding and experiments
+written abstract, evaluation, Our implementation and conclusion
+
+Magnus Evensberget:
+Read into the implementation of FFMPEG, although not implemented in our project due to time constraints.
+Written intro, related, design, The choice of streamer, optimizations
