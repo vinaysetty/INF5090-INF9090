@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
         printf("Failed to create folder downloads\n");
         
     }
+    int numPackets = 0;
 	for(EVER) {
 		// Check for new messages. This is either because of higher sequence number or because unsinged char has wrapped
 		if(((unsigned char) *chat_msg > counter) || (counter == 255 && (unsigned char) *chat_msg == 1)) {
@@ -112,15 +113,11 @@ int main(int argc, char **argv) {
             memcpy(message,chat_msg+1,size_msg*pageSize-1);
             
             printf("Seq: %d\n", counter);
-            if(file_size >= 0)
-            {
-                
-                uint32 bytes = GetInt32(chat_msg+1);
-                printf("size of packet %u\n", bytes);
-            }
+          
 
                         if(strncmp(message, "file:", strlen("file:")) == 0)
                         {
+                            numPackets++;
                             printf("got file header\n");
                             char *substr = strstr(message, "|");
                             printf("%s\n", substr);
@@ -143,19 +140,22 @@ int main(int argc, char **argv) {
                         
                         if(file_size >= 0)
                         {
+                            numPackets++;
                          
 //                             printf("num bytes in hex%x%x%x%x\n", message, message+1, message+2,message+3);
 //                            uint32 bytes = GetInt32(message);
                             uint32 bytes = GetInt32(message);
                             printf("size of packet %u\n", bytes);
                             bytes_rcvd += fwrite(message+4, 1, bytes, fd);
-                            printf("received so far: %d bytes \n", bytes_rcvd);                            
+                            printf("received so far: %d bytes %d packets \n", bytes_rcvd, numPackets);                            
                             fflush(fd);
                             if(bytes_rcvd == file_size)
                             {
                                 file_size = -1;
                                 fclose(fd);
                                 bytes_rcvd = 0;
+                                printf("Number of packets received: %d", numPackets);
+
                             }
                             
                             continue;
